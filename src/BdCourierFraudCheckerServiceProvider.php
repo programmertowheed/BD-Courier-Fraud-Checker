@@ -18,8 +18,8 @@ class BdCourierFraudCheckerServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->publishes([
-            __DIR__ . "/../config/BdCourierFraudChecker.php" => config_path("BdCourierFraudChecker.php")
-        ]);
+            __DIR__ . '/../config/bdcourierfraudchecker.php' => config_path('bdcourierfraudchecker.php'),
+        ], 'bdcourierfraudchecker-config');
     }
 
     /**
@@ -29,7 +29,7 @@ class BdCourierFraudCheckerServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__ . "/../config/BdCourierFraudChecker.php", "BdCourierFraudChecker");
+        $this->mergeConfigFrom(__DIR__ . "/../config/bdcourierfraudchecker.php", "bdcourierfraudchecker");
 
         $this->app->singleton(CourierCheckerService::class, function ($app) {
             return new CourierCheckerService(

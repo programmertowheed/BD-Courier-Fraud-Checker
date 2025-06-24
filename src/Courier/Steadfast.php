@@ -27,8 +27,8 @@ class Steadfast
     public function steadfastOld($phoneNumber)
     {
         $phoneNumber = $this->validateBDPhoneNumber($phoneNumber);
-        $email = config("BdCourierFraudChecker.steedfast_user");
-        $password = config("BdCourierFraudChecker.steedfast_password");
+        $email = config("bdcourierfraudchecker.steedfast_user");
+        $password = config("bdcourierfraudchecker.steedfast_password");
 
         // First Fetch login page
         $response = Http::get('https://steadfast.com.bd/login');
@@ -132,8 +132,8 @@ class Steadfast
     public function steadfast($phoneNumber)
     {
         $phoneNumber = $this->validateBDPhoneNumber($phoneNumber);
-        $email = config("BdCourierFraudChecker.steedfast_user");
-        $password = config("BdCourierFraudChecker.steedfast_password");
+        $email = config("bdcourierfraudchecker.steedfast_user");
+        $password = config("bdcourierfraudchecker.steedfast_password");
 
         $loginCookiesArray = Cache::get($this->cacheKey);
 

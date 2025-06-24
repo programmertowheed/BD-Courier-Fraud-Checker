@@ -30,8 +30,8 @@ class Pathao
 
         // No cached token, login and get new one
         $response = Http::post('https://merchant.pathao.com/api/v1/login', [
-            'username' => config("BdCourierFraudChecker.pathao_user"),
-            'password' => config("BdCourierFraudChecker.pathao_password"),
+            'username' => config("bdcourierfraudchecker.pathao_user"),
+            'password' => config("bdcourierfraudchecker.pathao_password"),
         ]);
 
         // Check if the response is not success

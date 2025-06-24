@@ -18,7 +18,7 @@ class Redx
     {
         // Check for required environment variables
         $this->checkRequiredConfig(['redx_phone', 'redx_password']);
-        $this->validateBDPhoneNumber(config("BdCourierFraudChecker.redx_phone"));
+        $this->validateBDPhoneNumber(config("bdcourierfraudchecker.redx_phone"));
     }
 
     protected function getAccessToken()
@@ -34,8 +34,8 @@ class Redx
             'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36',
             'Accept' => 'application/json, text/plain, */*',
         ])->post('https://api.redx.com.bd/v4/auth/login', [
-            'phone' => '88' . $this->validateBDPhoneNumber(config("BdCourierFraudChecker.redx_phone")),
-            'password' => config("BdCourierFraudChecker.redx_password"),
+            'phone' => '88' . $this->validateBDPhoneNumber(config("bdcourierfraudchecker.redx_phone")),
+            'password' => config("bdcourierfraudchecker.redx_password"),
         ]);
 
         if (!$response->successful()) {

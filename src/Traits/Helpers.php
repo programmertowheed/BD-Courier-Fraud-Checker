@@ -22,7 +22,7 @@ trait Helpers
      * @param string $configRoot
      * @return void
      */
-    public function checkRequiredConfig(array $requiredKeys, string $configRoot = 'BdCourierFraudChecker')
+    public function checkRequiredConfig(array $requiredKeys, string $configRoot = 'bdcourierfraudchecker')
     {
         foreach ($requiredKeys as $key) {
             $value = config("$configRoot.{$key}");
