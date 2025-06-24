@@ -1,0 +1,57 @@
+{
+  "name": "programmertowheed/bd-courier-fraud-checker",
+  "description": "Check for fraudulent customers using Bangladeshi courier data.",
+  "keywords": [
+    "courier",
+    "courier-fraud-checker",
+    "laravel-courier-fraud-checker",
+    "courier-fraud-data",
+    "laravel-courier-fraud-checker",
+    "BD-courier-fraud-checker",
+    "fraud detection",
+    "order tracking",
+    "delivery",
+    "fraud checker",
+    "pathao",
+    "steadfast courier",
+    "fraud prevention",
+    "Laravel package",
+    "e-commerce fraud",
+    "Laravel fraud checker",
+    "delivery tracking"
+  ],
+  "type": "library",
+  "require": {
+    "php": "^7.4|^8.0|^8.1|^8.2|^8.3",
+    "ext-openssl": "*"
+  },
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Md Towheedul Islam",
+      "email": "programmertowheed@gmail.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Programmertowheed\\BdCourierFraudChecker\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Programmertowheed\\BdCourierFraudChecker\\Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Programmertowheed\\BdCourierFraudChecker\\BdCourierFraudCheckerServiceProvider"
+      ],
+      "aliases": {
+        "BdCourierFraudChecker": "Programmertowheed\\BdCourierFraudChecker\\Facade\\BdCourierFraudChecker"
+      }
+    }
+  }
+}
