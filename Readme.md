@@ -23,7 +23,8 @@ or
 php artisan vendor:publish --tag=bdcourierfraudchecker-config
 ```
 
-After publish config file setup your credential. you can see this in your config directory nagad.php file
+After publish config file setup your credential. you can see this in your config directory
+bdcourierfraudchecker-config.php file
 
 ```
 "pathao_user" => env("PATHAO_USER", ""),
@@ -79,27 +80,27 @@ print_r($response);
         "status" => true,
         "message" => "Successful.",
         "data" => [
-            "success" => 0,
-            "cancel" => 0,
-            "total" => 0
+            "success" => 4,
+            "cancel" => 1,
+            "total" => 5
         ]
     ],
     "pathao" => [
         "status" => true,
         "message" => "Successful.",
         "data" => [
-            "success" => 0,
+            "success" => 10,
             "cancel" => 0,
-            "total" => 0
+            "total" => 10
         ]
     ],
     "redx" => [
         "status" => true,
         "message" => "Successful.",
         "data" => [
-            "success" => 0,
-            "cancel" => 0,
-            "total" => 0
+            "success" => 7,
+            "cancel" => 2,
+            "total" => 9
         ]
     ]
 ]
