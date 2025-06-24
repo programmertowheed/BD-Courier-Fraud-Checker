@@ -4,7 +4,6 @@ namespace Programmertowheed\BdCourierFraudChecker\Courier;
 
 use Illuminate\Support\Facades\Http;
 use Programmertowheed\BdCourierFraudChecker\Traits\Helpers;
-use ShahariarAhmad\CourierFraudCheckerBd\Helpers\CourierFraudCheckerHelper;
 use Illuminate\Support\Facades\Cache;
 
 class Redx
@@ -31,8 +30,10 @@ class Redx
 
         // No cached token, login and get new one
         $response = Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36',
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
             'Accept' => 'application/json, text/plain, */*',
+            'Origin' => 'https://redx.com.bd',
+            'referer' => 'https://redx.com.bd/',
         ])->post('https://api.redx.com.bd/v4/auth/login', [
             'phone' => '88' . $this->validateBDPhoneNumber(config("bdcourierfraudchecker.redx_phone")),
             'password' => config("bdcourierfraudchecker.redx_password"),
@@ -41,6 +42,13 @@ class Redx
         if (!$response->successful()) {
             return null;
         }
+
+        $loginCookiesArray = [];
+        foreach ($response->cookies()->toArray() as $cookie) {
+            $loginCookiesArray[$cookie['Name']] = $cookie['Value'];
+        }
+
+        dd($loginCookiesArray);
 
         $token = $response->json('data.accessToken');
         if ($token) {
@@ -52,44 +60,100 @@ class Redx
 
     public function redx(string $queryPhone)
     {
-
         $queryPhone = $this->validateBDPhoneNumber($queryPhone);
 
-        $accessToken = $this->getAccessToken();
+        $maxRetries = 2;
+        $attempt = 0;
+        $accessToken = null;
+        while ($attempt < $maxRetries) {
+            $accessToken = $this->getAccessToken();
+
+            if ($accessToken) {
+                break;
+            }
+            $attempt++;
+        }
 
         if (!$accessToken) {
-            return ['error' => 'Login failed or unable to get access token'];
+            return [
+                'status' => false,
+                'message' => "Login failed or unable to get access token",
+            ];
         }
 
         $response = Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0 Safari/537.36',
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
             'Accept' => 'application/json, text/plain, */*',
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $accessToken,
+            'Origin' => 'https://redx.com.bd',
+            'referer' => 'https://redx.com.bd/',
         ])->get("https://redx.com.bd/api/redx_se/admin/parcel/customer-success-return-rate?phoneNumber=88{$queryPhone}");
 
         if ($response->successful()) {
-            $object = $response->json();
+            $json = $response->json();
+            $data = isset($json['data']) ? $json['data'] : [];
+
+            $delivered = isset($data['deliveredParcels']) ? (int)$data['deliveredParcels'] : 0;
+            $total = isset($data['totalParcels']) ? (int)$data['totalParcels'] : 0;
+            $cancel = max($total - $delivered, 0);
+
+            // $returnPercentage = (int)($data['returnedPercentage'] ?? 0);
+            // $customerSegment = (string)($data['customerSegment'] ?? "");
+
+            $deliveredPercentage = $total > 0 ? round(($delivered / $total) * 100, 2) : 0;
+            $returnPercentage = $total > 0 ? round(($cancel / $total) * 100, 2) : 0;
+
+            $result = [
+                'success' => $delivered,
+                'cancel' => $cancel,
+                'total' => $total,
+                'deliveredPercentage' => $deliveredPercentage,
+                'returnPercentage' => $returnPercentage,
+            ];
 
             return [
-                'success' => isset($object['data']['deliveredParcels']) ? (int)$object['data']['deliveredParcels'] : 0,
-                'cancel' => isset($object['data']['totalParcels'], $object['data']['deliveredParcels'])
-                    ? ((int)$object['data']['totalParcels'] - (int)$object['data']['deliveredParcels'])
-                    : 0,
-                'total' => isset($object['data']['totalParcels']) ? (int)$object['data']['totalParcels'] : 0,
-                // 'returnPercentage' => isset($object['data']['returnPercentage']) ? (int)$object['data']['returnPercentage'] : 0,
-                // 'customerSegment' => $object['data']['customerSegment'] ?? 'Unknown',
+                'status' => true,
+                'message' => "Successful.",
+                'data' => $result,
             ];
         } elseif ($response->status() === 401) {
             // Token expired or invalid, clear cache and suggest retry
             Cache::forget($this->cacheKey);
-            return ['error' => 'Access token expired or invalid. Please retry.', 'status' => 401];
+
+            return [
+                'status' => false,
+                'message' => "Access token expired or invalid. Please retry.",
+            ];
         }
+
+        $this->logoutFromRedx($accessToken);
+
+        // Get the full response body as JSON
+        $error = ($response) ? $response->json() : [];
+
+        // Optionally get a specific message
+        $message = $error['message'] ?? 'Unknown error occurred.';
         return [
-            'success' => 'API Error, try sometime later',
-            'cancel' => 'API Error, try sometime later',
-            'total' => 'API Error, try sometime later',
+            'status' => false,
+            'message' => $message,
         ];
 
     }
+
+    private function logoutFromRedx(string $accessToken): void
+    {
+        Cache::forget($this->cacheKey);
+
+        Http::withHeaders([
+            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+            'Accept' => 'application/json, text/plain, */*',
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $accessToken,
+            'Origin' => 'https://redx.com.bd',
+            'referer' => 'https://redx.com.bd/',
+        ])->get("https://api.redx.com.bd/v1/user/logout");
+    }
+
+
 }

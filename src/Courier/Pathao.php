@@ -5,7 +5,6 @@ namespace Programmertowheed\BdCourierFraudChecker\Courier;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Programmertowheed\BdCourierFraudChecker\Traits\Helpers;
-use ShahariarAhmad\CourierFraudCheckerBd\Helpers\CourierFraudCheckerHelper;
 
 class Pathao
 {
@@ -51,33 +50,62 @@ class Pathao
     public function pathao($phone)
     {
         $phone = $this->validateBDPhoneNumber($phone);
-        $accessToken = $this->getAccessToken();
+
+        $maxRetries = 2;
+        $attempt = 0;
+        $accessToken = null;
+        while ($attempt < $maxRetries) {
+            $accessToken = $this->getAccessToken();
+
+            if ($accessToken) {
+                break;
+            }
+            Cache::forget($this->cacheKey);
+            $attempt++;
+        }
 
         if ($accessToken) {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer ' . $accessToken,
-            ])->post('https://merchant.pathao.com/api/v1/user/success', [
-                'phone' => $phone,
-            ]);
 
-            if ($response->successful()) {
+            $maxRetries = 2;
+            $attempt = 0;
+            $response = null;
+            while ($attempt < $maxRetries) {
+                $response = $this->getOrderData($accessToken, $phone);
+
+                if ($response->successful()) {
+                    break;
+                }
+                $attempt++;
+            }
+
+            if ($response && $response->successful()) {
                 $object = $response->json();
+                $customer = isset($object['data']['customer']) ? $object['data']['customer'] : [];
+
+                $success = isset($customer['successful_delivery']) ? (int)$customer['successful_delivery'] : 0;
+                $total = isset($customer['total_delivery']) ? (int)$customer['total_delivery'] : 0;
+                $cancel = max($total - $success, 0);
+
+                // Calculate percentages
+                $deliveredPercentage = $total > 0 ? round(($success / $total) * 100, 2) : 0;
+                $returnPercentage = $total > 0 ? round(($cancel / $total) * 100, 2) : 0;
 
                 $data = [
-                    'success' => $object['data']['customer']['successful_delivery'] ?? 0,
-                    'cancel' => ($object['data']['customer']['total_delivery'] ?? 0) - ($object['data']['customer']['successful_delivery'] ?? 0),
-                    'total' => $object['data']['customer']['total_delivery'] ?? 0,
+                    'success' => $success,
+                    'cancel' => $cancel,
+                    'total' => $total,
+                    'deliveredPercentage' => $deliveredPercentage,
+                    'returnPercentage' => $returnPercentage,
                 ];
 
                 return [
                     'status' => true,
-                    'message' => "Successful.",
+                    'message' => 'Successful.',
                     'data' => $data,
                 ];
             } else {
                 // Get the full response body as JSON
-                $error = $response->json();
+                $error = ($response) ? $response->json() : [];
 
                 // Optionally get a specific message
                 $message = $error['message'] ?? 'Unknown error occurred.';
@@ -95,4 +123,17 @@ class Pathao
             'message' => "Authentication failed",
         ];
     }
+
+
+    private function getOrderData($accessToken, $phone)
+    {
+        return Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'Authorization' => 'Bearer ' . $accessToken,
+        ])->post('https://merchant.pathao.com/api/v1/user/success', [
+            'phone' => $phone,
+        ]);
+    }
+
+
 }

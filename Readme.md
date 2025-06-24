@@ -76,33 +76,39 @@ print_r($response);
 
 ```php
 [
-    "steadfast" => [
-        "status" => true,
-        "message" => "Successful.",
-        "data" => [
-            "success" => 4,
-            "cancel" => 1,
-            "total" => 5
-        ]
+    'steadfast' => [
+        'status' => true,
+        'message' => 'Successful.',
+        'data' => [
+            'success' => 2,
+            'cancel' => 0,
+            'total' => 2,
+            'deliveredPercentage' => 100,
+            'returnPercentage' => 0,
+        ],
     ],
-    "pathao" => [
-        "status" => true,
-        "message" => "Successful.",
-        "data" => [
-            "success" => 10,
-            "cancel" => 0,
-            "total" => 10
-        ]
+    'pathao' => [
+        'status' => true,
+        'message' => 'Successful.',
+        'data' => [
+            'success' => 3,
+            'cancel' => 0,
+            'total' => 3,
+            'deliveredPercentage' => 100,
+            'returnPercentage' => 0,
+        ],
     ],
-    "redx" => [
-        "status" => true,
-        "message" => "Successful.",
-        "data" => [
-            "success" => 7,
-            "cancel" => 2,
-            "total" => 9
-        ]
-    ]
+    'redx' => [
+        'status' => true,
+        'message' => 'Successful.',
+        'data' => [
+            'success' => 0,
+            'cancel' => 0,
+            'total' => 0,
+            'deliveredPercentage' => 0,
+            'returnPercentage' => 0,
+        ],
+    ],
 ]
 ```
 
