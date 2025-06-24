@@ -24,6 +24,7 @@ class Redx
     {
         // Try cached token first
         $token = Cache::get($this->cacheKey);
+
         if ($token) {
             return $token;
         }
@@ -42,13 +43,6 @@ class Redx
         if (!$response->successful()) {
             return null;
         }
-
-        $loginCookiesArray = [];
-        foreach ($response->cookies()->toArray() as $cookie) {
-            $loginCookiesArray[$cookie['Name']] = $cookie['Value'];
-        }
-
-        dd($loginCookiesArray);
 
         $token = $response->json('data.accessToken');
         if ($token) {
@@ -92,6 +86,7 @@ class Redx
 
         if ($response->successful()) {
             $json = $response->json();
+
             $data = isset($json['data']) ? $json['data'] : [];
 
             $delivered = isset($data['deliveredParcels']) ? (int)$data['deliveredParcels'] : 0;
@@ -127,8 +122,6 @@ class Redx
             ];
         }
 
-        $this->logoutFromRedx($accessToken);
-
         // Get the full response body as JSON
         $error = ($response) ? $response->json() : [];
 
@@ -139,20 +132,6 @@ class Redx
             'message' => $message,
         ];
 
-    }
-
-    private function logoutFromRedx(string $accessToken): void
-    {
-        Cache::forget($this->cacheKey);
-
-        Http::withHeaders([
-            'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-            'Accept' => 'application/json, text/plain, */*',
-            'Content-Type' => 'application/json',
-            'Authorization' => 'Bearer ' . $accessToken,
-            'Origin' => 'https://redx.com.bd',
-            'referer' => 'https://redx.com.bd/',
-        ])->get("https://api.redx.com.bd/v1/user/logout");
     }
 
 
