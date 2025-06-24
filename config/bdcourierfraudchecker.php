@@ -10,8 +10,6 @@ return [
     "steedfast_user" => env("STEADFAST_USER", ""),
     "steedfast_password" => env("STEADFAST_PASSWORD", ""),
 
-    'timezone' => 'Asia/Dhaka',
-
     'message' => [
         "pathao_user" => 'PATHAO_USER',
         "pathao_password" => 'PATHAO_PASSWORD',

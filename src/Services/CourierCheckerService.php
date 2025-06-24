@@ -23,8 +23,8 @@ class CourierCheckerService
     {
         return [
             'steadfast' => $this->steadfast->steadfast($phone),
-//            'pathao' => $this->pathao->pathao($phone),
-//            'redx' => $this->redx->getCustomerDeliveryStats($phone),
+            'pathao' => $this->pathao->pathao($phone),
+            'redx' => $this->redx->redx($phone),
         ];
     }
 }

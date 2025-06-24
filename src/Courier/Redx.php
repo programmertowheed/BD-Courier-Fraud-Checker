@@ -50,7 +50,7 @@ class Redx
         return $token;
     }
 
-    public function getCustomerDeliveryStats(string $queryPhone)
+    public function redx(string $queryPhone)
     {
 
         $queryPhone = $this->validateBDPhoneNumber($queryPhone);
