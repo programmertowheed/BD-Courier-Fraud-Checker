@@ -66,7 +66,7 @@ STEADFAST_PASSWORD=""
 ### Basic Usage
 
 ```
-use BdCourierFraudChecker;
+use Programmertowheed\BdCourierFraudChecker\Facade\BdCourierFraudChecker;
 
 $response = BdCourierFraudChecker::check("01991858371");
 print_r($response);
